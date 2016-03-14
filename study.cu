@@ -4,8 +4,6 @@
 
 #define N 512
 
-using namespace thrust;
-
 class Study {
     public:
         int data[N];
@@ -27,7 +25,7 @@ __global__ void test(Study* s) {
 }
 
 int main() {
-    device_ptr<Study> s = device_new<Study>();
+    thrust::device_ptr<Study> s = thrust::device_new<Study>();
     test<<<1,1>>>(thrust::raw_pointer_cast(s));
 
     cudaDeviceSynchronize();

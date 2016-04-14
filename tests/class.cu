@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define N 250000
 
@@ -61,32 +62,53 @@ int main() {
     struct Strategy strategies[N];
     struct Strategy *devStrategies;
     int i;
+    int j;
 
-    struct Tick tick = {1460611103, 89.5, 89.9, 89.2, 89.4, 89.7, 89.75, 89.72, 89.76, 89.9, 89.2, 89.4, 89.7, 89.75, 89.72, 89.76};
-    struct Tick *devTick;
+    int tickCount = 1000000;
+    struct Tick *ticks = (Tick*) malloc(tickCount * sizeof(Tick));
+    struct Tick *devTicks;
+    int kFoldCount = 10;
+
+    for (i=0; i<tickCount; i++) {
+        ticks[i].timestamp = 1460611103;
+        ticks[i].open = 89.5;
+        ticks[i].high = 89.9;
+        ticks[i].low = 89.2;
+        ticks[i].close = 89.4;
+        ticks[i].rsi2 = 89.7;
+        ticks[i].rsi5 = 89.75;
+        ticks[i].rsi7 = 89.72;
+        ticks[i].rsi9 = 89.76;
+        ticks[i].rsi14 = 89.9;
+        ticks[i].stochastic5K = 89.2;
+        ticks[i].stochastic5D = 89.4;
+        ticks[i].stochastic10K = 89.7;
+        ticks[i].stochastic10D = 89.75;
+        ticks[i].stochastic14K = 89.72;
+        ticks[i].stochastic14D = 89.76;
+    }
 
     cudaSetDevice(0);
 
     // Allocate memory on the GPU for the strategies.
-    // TODO: Allocate memory on all GPUs.
     cudaMalloc((void**)&devStrategies, N * sizeof(Strategy));
     
+    // Copy tick data to the GPU.
+    cudaMalloc((void**)&devTicks, N * sizeof(Tick));
+    cudaMemcpy(devTicks, ticks, N * sizeof(Tick), cudaMemcpyHostToDevice);
+
     // Initialize strategies on the GPU.
     initializeStrategies<<<blockCount, threadsPerBlock>>>(devStrategies);
 
-    for (i=0; i<1000000; i++) {
-        // Copy tick data to the GPU.
-        // TODO: Copy to all GPUs.
-        cudaMalloc((void**)&devTick, sizeof(Tick));
-        cudaMemcpy(devTick, &tick, sizeof(Tick), cudaMemcpyHostToDevice);
-
-        // Run backtests for all strategies.
-        // TODO: Run on all GPUs.
-        backtestStrategies<<<blockCount, threadsPerBlock>>>(devStrategies, devTick);
-
-        // Free memory for the tick from the GPU.
-        cudaFree(devTick);
+    for (i=0; i<kFoldCount; i++) {
+        for (j=0; j<tickCount; j++) {
+            // Run backtests for all strategies.
+            backtestStrategies<<<blockCount, threadsPerBlock>>>(devStrategies, &devTicks[j]);
+        }
     }
+
+    // Free memory for the tick from the GPU.
+    cudaFree(devTicks);
 
     // TODO: Determine if this is necessary.
     //cudaDeviceSynchronize();

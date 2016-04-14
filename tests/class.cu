@@ -107,7 +107,7 @@ int main() {
         }
     }
 
-    // Free memory for the tick from the GPU.
+    // Free memory for the tick data from the GPU.
     cudaFree(devTicks);
 
     // TODO: Determine if this is necessary.

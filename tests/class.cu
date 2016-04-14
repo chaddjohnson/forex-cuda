@@ -65,6 +65,8 @@ int main() {
     struct Tick tick = {1460611103, 89.5, 89.9, 89.2, 89.4, 89.7, 89.75, 89.72, 89.76, 89.9, 89.2, 89.4, 89.7, 89.75, 89.72, 89.76};
     struct Tick *devTick;
 
+    cudaSetDevice(0);
+
     // Allocate memory on the GPU for the strategies.
     // TODO: Allocate memory on all GPUs.
     cudaMalloc((void**)&devStrategies, N * sizeof(Strategy));
@@ -86,7 +88,8 @@ int main() {
         cudaFree(devTick);
     }
 
-    cudaDeviceSynchronize();
+    // TODO: Determine if this is necessary.
+    //cudaDeviceSynchronize();
 
     // Copy strategies from the GPU.
     cudaMemcpy(strategies, devStrategies, N * sizeof(Strategy), cudaMemcpyDeviceToHost);

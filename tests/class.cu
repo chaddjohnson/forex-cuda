@@ -69,6 +69,10 @@ int main() {
     struct Tick *devTicks;
     int kFoldCount = 10;
 
+    void (*backtester)(struct Strategy*, struct Tick*);
+
+    backtester = &backtestStrategies;
+
     for (i=0; i<tickCount; i++) {
         ticks[i].timestamp = 1460611103;
         ticks[i].open = 89.5;
@@ -103,7 +107,7 @@ int main() {
     for (i=0; i<kFoldCount; i++) {
         for (j=0; j<tickCount; j++) {
             // Run backtests for all strategies.
-            backtestStrategies<<<blockCount, threadsPerBlock>>>(devStrategies, &devTicks[j]);
+            (*backtester)<<<blockCount, threadsPerBlock>>>(devStrategies, &devTicks[j]);
         }
     }
 

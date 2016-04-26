@@ -1,6 +1,11 @@
 #define N 250000
 
 struct Tick {
+    long timestamp;
+    double open;
+    double high;
+    double low;
+    double close;
     double sma13;
     double ema50;
     double ema100;
@@ -19,12 +24,12 @@ int j = 0;
 
 // Create a two-dimensional array of ticks of dimensions (tickCount x configurationCount).
 // Source: http://stackoverflow.com/a/3275389/83897
-Tick **data = (Tick**)malloc(tickCount * sizeof(Tick*));
+Tick **ticks = (Tick**) malloc(tickCount * sizeof(Tick*));
 for (i=0; i<tickCount; i++) {
-    data[i] = (Tick*)malloc(configurationCount * sizeof(Tick));
+    ticks[i] = (Tick*) malloc(configurationCount * sizeof(Tick));
 }
 
-// Loop through all data.
+// Loop through all ticks.
 for (i=0; i<tickCount; i++) {
     // Loop through all configurations.
     for (j=0; j<configurationCount; j++) {

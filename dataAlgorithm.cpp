@@ -18,9 +18,10 @@ int i = 0;
 int j = 0;
 
 // Create a two-dimensional array of ticks of dimensions (tickCount x configurationCount).
+// Source: http://stackoverflow.com/a/3275389/83897
 struct **data = (Tick**)malloc(tickCount * sizeof(Tick*));
 for (i=0; i<configurationCount; i++) {
-    data[i] = (Tick*)malloc(configurationCount * sizeof(test));
+    data[i] = (Tick*)malloc(configurationCount * sizeof(Tick));
 }
 
 // Loop through all data.
@@ -33,7 +34,7 @@ for (i=0; i<tickCount; i++) {
         // Retrieve the target field value for the current configuration.
         // ...
 
-        // Create a new tick
+        // Create a new tick.
         // ...
 
         // Set the properties of the tick using the retrieved target field values.

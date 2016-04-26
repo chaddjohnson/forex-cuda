@@ -45,12 +45,12 @@ __global__ void initializeStrategies(Strategy *strategies) {
     }
 }
 
-__global__ void backtestStrategies(Strategy *strategies, Tick *tick) {
+__global__ void backtestStrategies(Strategy *strategies, Tick *ticks) {
     // TODO: Harness multiple dimensions?
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < CONFIGURATION_COUNT) {
-        strategies[i].backtest(&strategies[i], tick);
+        strategies[i].backtest(&strategies[i], &ticks[i]);
     }
 }
 
@@ -65,7 +65,7 @@ int main() {
     int k = 0;
 
     int tickCount = 1000000;
-    Tick *ticks = (Tick*) malloc(CONFIGURATION_COUNT * sizeof(Tick));;
+    Tick *ticks = (Tick*) malloc(CONFIGURATION_COUNT * sizeof(Tick));
     Tick *devTicks;
     int kFoldCount = 10;
 
@@ -88,9 +88,6 @@ int main() {
         // Run through every tick.
         for (j=0; j<tickCount; j++) {
             printf("%i\n", j);
-
-            // Wait for currently-running kernels to finish.
-            cudaDeviceSynchronize();
 
             // Set up data for every configuration.
             for (k=0; k<CONFIGURATION_COUNT; k++) {
@@ -115,6 +112,9 @@ int main() {
 
             // Run backtests for all strategy configurations.
             (*backtester)<<<blockCount, threadsPerBlock>>>(devStrategies, devTicks);
+
+            // Wait for currently-running kernels to finish.
+            cudaDeviceSynchronize();
         }
     }
 

@@ -1,4 +1,4 @@
-#define N 250000
+#define CONFIGURATION_COUNT 250000
 
 struct Tick {
     long timestamp;
@@ -18,21 +18,20 @@ struct Tick {
 };
 
 int tickCount = 1000000;
-int configurationCount = N;
 int i = 0;
 int j = 0;
 
-// Create a two-dimensional array of ticks of dimensions (tickCount x configurationCount).
+// Create a two-dimensional array of ticks of dimensions (tickCount x CONFIGURATION_COUNT).
 // Source: http://stackoverflow.com/a/3275389/83897
 Tick **ticks = (Tick**) malloc(tickCount * sizeof(Tick*));
 for (i=0; i<tickCount; i++) {
-    ticks[i] = (Tick*) malloc(configurationCount * sizeof(Tick));
+    ticks[i] = (Tick*) malloc(CONFIGURATION_COUNT * sizeof(Tick));
 }
 
 // Loop through all ticks.
 for (i=0; i<tickCount; i++) {
     // Loop through all configurations.
-    for (j=0; j<configurationCount; j++) {
+    for (j=0; j<CONFIGURATION_COUNT; j++) {
         // Retrieve the target field name for the current configuration.
         // ...
 

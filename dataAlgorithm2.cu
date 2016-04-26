@@ -89,16 +89,8 @@ int main() {
         for (j=0; j<tickCount; j++) {
             printf("%i\n", j);
 
-            if (j > 0) {
-                // Wait for currently-running kernels to finish.
-                cudaDeviceSynchronize();
-
-                // Free currently-allocated GPU memory, and allocate more.
-                cudaFree(devTicks);
-
-                // Clear host memory for previous ticks.
-                memset(ticks, 0, CONFIGURATION_COUNT * sizeof(Tick));
-            }
+            // Wait for currently-running kernels to finish.
+            cudaDeviceSynchronize();
 
             // Set up data for every configuration.
             for (k=0; k<CONFIGURATION_COUNT; k++) {

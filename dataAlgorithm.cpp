@@ -20,7 +20,7 @@ int j = 0;
 // Create a two-dimensional array of ticks of dimensions (tickCount x configurationCount).
 // Source: http://stackoverflow.com/a/3275389/83897
 Tick **data = (Tick**)malloc(tickCount * sizeof(Tick*));
-for (i=0; i<configurationCount; i++) {
+for (i=0; i<tickCount; i++) {
     data[i] = (Tick*)malloc(configurationCount * sizeof(Tick));
 }
 

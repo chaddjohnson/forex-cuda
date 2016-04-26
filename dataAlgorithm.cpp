@@ -1,10 +1,10 @@
 #define N 250000
 
 struct Tick {
-    int sma13;
-    int ema50;
-    int ema100;
-    int ema200;
+    double sma13;
+    double ema50;
+    double ema100;
+    double ema200;
     double rsi;
     double stochK;
     double stochD;

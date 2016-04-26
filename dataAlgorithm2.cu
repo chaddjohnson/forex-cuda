@@ -22,7 +22,7 @@ struct Tick {
 
 struct Strategy {
     double profitLoss;
-    void (*backtest)(Strategy *, Tick *);
+    void (*backtest)(Strategy*, Tick*);
 };
 
 __device__ void backtest(Strategy *self, Tick *tick) {

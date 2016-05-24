@@ -8,8 +8,8 @@ class Strategy {
         double profitLoss;
 
     public:
-        __device__ Strategy() {
-            this->profitLoss = 0;
+        __device__ Strategy(int initialProfitLoss) {
+            this->profitLoss = initialProfitLoss;
         }
         __device__ void backtest() {
             int i = 0;
@@ -19,7 +19,7 @@ class Strategy {
                 j++;
             }
 
-            this->profitLoss += 1.0;
+            this->profitLoss++;
         }
         __device__ __host__ double getProfitLoss() {
             return this->profitLoss;
@@ -30,7 +30,7 @@ __global__ void initializeStrategies(Strategy *strategies) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (i < N) {
-        strategies[i] = Strategy::Strategy();
+        strategies[i] = Strategy::Strategy(i);
     }
 }
 
@@ -50,22 +50,27 @@ int main() {
 
     Strategy *devStrategies;
     Strategy *strategies = (Strategy*)malloc(N * sizeof(Strategy));
+    double *data = (double*)malloc(1000 * sizeof(double));
+    double *devData;
     int i = 0;
 
     cudaSetDevice(0);
 
     // Allocate memory for strategies on the GPU.
     cudaMalloc((void**)&devStrategies, N * sizeof(Strategy));
+    cudaMalloc((void**)&devData, 1000 * sizeof(double));
 
     // Initialize strategies on the GPU.
     initializeStrategies<<<blockCount, threadsPerBlock>>>(devStrategies);
 
     for (i=0; i<3635988; i++) {
         backtestStrategies<<<blockCount, threadsPerBlock>>>(devStrategies);
+        printf("\r%i", i);
     }
 
     // Copy strategies from the GPU.
     cudaMemcpy(strategies, devStrategies, N * sizeof(Strategy), cudaMemcpyDeviceToHost);
+    cudaMemcpy(data, devData, 1000 * sizeof(double), cudaMemcpyDeviceToHost);
 
     // Display results.
     for (i=0; i<1000; i++) {

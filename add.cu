@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <thrust/device_ptr.h>
-#include <thrust/device_new.h>
 
 #define N 1024000
 
@@ -29,7 +27,7 @@ int main() {
     cudaMemcpy(dev_data, data, N * sizeof(int), cudaMemcpyHostToDevice);
 
     for (i=0; i<100; i++) {
-        add<<<1000, 1024>>>(dev_data);
+        add<<<32, 1024>>>(dev_data);
     }
 
     cudaDeviceSynchronize();
@@ -40,9 +38,9 @@ int main() {
     // Free memory allocated on the GPU.
     cudaFree(dev_data);
 
-    // for (i=0; i<N; i++) {
-    //     printf("%d\n", data[i]);
-    // }
+    for (i=0; i<N; i++) {
+        printf("%d\n", data[i]);
+    }
 
     return 0;
 }

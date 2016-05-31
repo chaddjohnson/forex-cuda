@@ -8,17 +8,10 @@ class Strategy {
         double profitLoss;
 
     public:
-        __device__ __host__ Strategy(int initialProfitLoss) {
-            this->profitLoss = initialProfitLoss;
+        __device__ __host__ Strategy() {
+            this->profitLoss = 0;
         }
         __device__ __host__ void backtest() {
-            int i = 0;
-            int j = 0;
-
-            for (i=0; i<50; i++) {
-                j++;
-            }
-
             this->profitLoss++;
         }
         __device__ __host__ double getProfitLoss() {
@@ -27,34 +20,29 @@ class Strategy {
 };
 
 __global__ void backtestStrategies(Strategy *strategies) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-
-    if (i < N) {
+    // Reference: https://devblogs.nvidia.com/parallelforall/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/
+    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
+         i < N;
+         i += blockDim.x * gridDim.x)
+    {
         strategies[i].backtest();
     }
 }
 
 int main() {
-    // int threadsPerBlock = 1000;
-    // int blockCount = N / threadsPerBlock;
-    int threadsPerBlock = 1024;
     int blockCount = 32;
+    int threadsPerBlock = 1024;
 
     Strategy *devStrategies;
     Strategy *strategies = (Strategy*)malloc(N * sizeof(Strategy));
-    double *data = (double*)malloc(1000 * sizeof(double));
-    double *devData;
     int i = 0;
-
-    cudaSetDevice(0);
 
     // Allocate memory for strategies on the GPU.
     cudaMalloc((void**)&devStrategies, N * sizeof(Strategy));
-    cudaMalloc((void**)&devData, 1000 * sizeof(double));
 
     // Initialize strategies on host.
     for (i=0; i<N; i++) {
-        strategies[i] = Strategy::Strategy(i);
+        strategies[i] = Strategy();
     }
 
     // Copy strategies from host to GPU.
@@ -62,15 +50,13 @@ int main() {
 
     for (i=0; i<363598; i++) {
         backtestStrategies<<<blockCount, threadsPerBlock>>>(devStrategies);
-        printf("\r%i", i);
     }
 
     // Copy strategies from the GPU.
     cudaMemcpy(strategies, devStrategies, N * sizeof(Strategy), cudaMemcpyDeviceToHost);
-    cudaMemcpy(data, devData, 1000 * sizeof(double), cudaMemcpyDeviceToHost);
 
     // Display results.
-    for (i=0; i<1000; i++) {
+    for (i=0; i<N; i++) {
         printf("%f\n", strategies[i].getProfitLoss());
     }
 

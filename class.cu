@@ -3,19 +3,30 @@
 
 #define N 200000
 
-class Strategy {
+class BaseStrategy {
     private:
         double profitLoss;
 
-    public:
-        __device__ __host__ Strategy() {
-            this->profitLoss = 0;
-        }
-        __device__ __host__ void backtest() {
+    protected:
+        __device__ void incrementProfitLoss() {
             this->profitLoss++;
         }
-        __device__ __host__ double getProfitLoss() {
+
+    public:
+        __host__ BaseStrategy() {
+            this->profitLoss = 0;
+        }
+        __device__ void backtest() {}
+        __host__ double getProfitLoss() {
             return this->profitLoss;
+        }
+};
+
+class Strategy : public BaseStrategy {
+    public:
+        __host__ Strategy() : BaseStrategy() {}
+        __device__ void backtest() {
+            incrementProfitLoss();
         }
 };
 
